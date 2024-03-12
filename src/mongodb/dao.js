@@ -81,7 +81,51 @@ const userBb = {
   }
 };
 
+const configListDb = {
+  // configList
+  async getList(queryStr, { pageIndex, pageSize }, userId) {
+    const db = mongodbCore.getDb();
+    // 查询列表数据
+    let queryRule = { userId };
+    if (queryStr) {
+      queryRule = {
+        // userId, // where userId='xxx' and ( shortLink like '%xx%' or xxx)
+        // $or: [{ shortLink: { $regex: queryStr } }, { redirect: { $regex: queryStr } }]
+      };
+    }
+    // 页码 - skip数据量 - 公式
+    // 1 0  (pageIndex - 1) * pageSize
+    // 2 pageSize
+    // 3
+    const list = await db
+      .collection('configList')
+      .find(queryRule)
+      .limit(pageSize)
+      .skip((pageIndex - 1) * pageSize)
+      .toArray();
+
+    const total = await db.collection('configList').find(queryRule).count();
+    return { list, total };
+  },
+
+  async add(payload) {
+    const db = mongodbCore.getDb();
+    // 插入数据时 _id 会自动增加
+    const insertResult = await db.collection('configList').insertMany([
+      {
+        // shortLink: payload.shortLink,
+        // redirect: payload.redirect,
+        // userId: userId,
+        bid: payload.bid, // 配置ID
+        config: payload.config, // 低代码 schema 配置
+        createDate: getCurDate()
+      }
+    ]);
+    return insertResult;
+  }
+};
 module.exports = {
   shortLinkDb,
-  userBb
+  userBb,
+  configListDb
 };

@@ -5,7 +5,7 @@ const bodyParser = require('koa-bodyparser');
 const app = new Koa();
 const router = new KoaRouter();
 const mongodbCore = require('./mongodb/mongodb.js');
-const { shortLinkDb } = require('./mongodb/dao.js');
+const { shortLinkDb, configListDb } = require('./mongodb/dao.js');
 const { userBb } = require('./mongodb/dao.js');
 const jwt = require('jsonwebtoken');
 
@@ -32,7 +32,7 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   console.log(ctx.path); // /shortLink/list、/shortLink/add
   let whiteList = ['/user/login'];
-  if (whiteList.includes(ctx.path) || ctx.path.startsWith('/share/') || ctx.userInfo) {
+  if (whiteList.includes(ctx.path) || ctx.path.startsWith('/configList/') || ctx.userInfo) {
     await next();
     return;
   }
@@ -59,7 +59,7 @@ app.use(async (ctx, next) => {
 // app.use(mpServer.verifyToken()); // token 校验中间件
 
 // 连接 mongodb，初始化 db
-mongodbCore.init({ dbName: 'zuo-config' });
+mongodbCore.init({ dbName: 'formily' });
 
 router.get('/share/test-deploy', async (ctx) => {
   ctx.body = {
@@ -68,8 +68,8 @@ router.get('/share/test-deploy', async (ctx) => {
       test: '新接口自动化部署成功'
     },
     msg: '成功'
-  }
-})
+  };
+});
 // 配置中心对外接口，暂时不需要鉴权（前端直接可以调用，不用登录）
 router.get('/share/shortLink/list', async (ctx) => {
   console.log('ctx.query', ctx.query);
@@ -201,6 +201,44 @@ router.post('/user/login', async (ctx) => {
   } catch (e) {
     console.log(e);
     ctx.body = { code: -10001, msg: '登录失败', plainMsg: e.message };
+  }
+});
+
+router.post('/configList/add', async (ctx) => {
+  console.log(ctx.request.body);
+  try {
+    let insertResult = await configListDb.add(ctx.request.body);
+    ctx.body = {
+      code: 0,
+      data: {
+        insertResult
+      },
+      msg: '成功'
+    };
+  } catch (e) {
+    ctx.body = { code: -10001, msg: '保存配置失败', plainMsg: e.message };
+  }
+});
+
+router.get('/configList/list', async (ctx) => {
+  console.log('ctx.query', ctx.query);
+  let { queryText, currentPage = 1, pageSize = 20 } = ctx.query;
+  try {
+    let { list, total } = await configListDb.getList(queryText, {
+      pageSize: parseInt(pageSize),
+      pageIndex: parseInt(currentPage)
+    });
+    ctx.body = {
+      code: 0,
+      data: {
+        queryText: ctx.query.queryText,
+        list,
+        total
+      },
+      msg: '成功'
+    };
+  } catch (e) {
+    ctx.body = { code: -10001, msg: '获取配置列表失败', plainMsg: e.message };
   }
 });
 
