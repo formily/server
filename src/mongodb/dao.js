@@ -1,6 +1,7 @@
 const mongodbCore = require('../mongodb/mongodb.js');
 const { ObjectId } = require('mongodb');
 const dayjs = require('dayjs');
+const { generateId } = require('../utils/utils.js');
 
 const getCurDate = () => dayjs().format('YYYY/MM/DD HH:mm:ss');
 
@@ -100,6 +101,7 @@ const configListDb = {
     const list = await db
       .collection('configList')
       .find(queryRule)
+      .sort({ createDate: -1 })
       .limit(pageSize)
       .skip((pageIndex - 1) * pageSize)
       .toArray();
@@ -110,18 +112,33 @@ const configListDb = {
 
   async add(payload) {
     const db = mongodbCore.getDb();
+    const { name, remark } = payload;
+    const insertData = {
+      name,
+      remark,
+      bid: generateId(),
+      // userId: userId,
+      // bid: payload.bid, // 配置ID
+      // config: payload.config, // 低代码 schema 配置
+      createDate: getCurDate()
+    };
     // 插入数据时 _id 会自动增加
-    const insertResult = await db.collection('configList').insertMany([
+    const insertResult = await db.collection('configList').insertMany([insertData]);
+    console.log('insertResult', insertResult);
+    return { result: insertResult, insertData };
+  },
+
+  async update(payload) {
+    const db = mongodbCore.getDb();
+    const { bid, config } = payload;
+    const result = await db.collection('configList').updateOne(
+      { bid },
       {
-        // shortLink: payload.shortLink,
-        // redirect: payload.redirect,
-        // userId: userId,
-        bid: payload.bid, // 配置ID
-        config: payload.config, // 低代码 schema 配置
-        createDate: getCurDate()
+        $set: { config, updateDate: getCurDate() }
       }
-    ]);
-    return insertResult;
+    );
+    console.log('result', result);
+    return { result: result };
   }
 };
 module.exports = {

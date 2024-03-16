@@ -204,17 +204,44 @@ router.post('/user/login', async (ctx) => {
   }
 });
 
+router.post('/configList/update', async (ctx) => {
+  console.log(ctx.request.body);
+  try {
+    let res = await configListDb.update(ctx.request.body);
+    let { result } = res;
+    if (result.modifiedCount === 1) {
+      ctx.body = {
+        code: 0,
+        data: result,
+        msg: '成功'
+      };
+    } else {
+      ctx.body = { code: -10001, msg: '保存配置失败', plainMsg: e.message };
+    }
+    ctx.body = {
+      code: 0,
+      data: res,
+      msg: '成功'
+    };
+  } catch (e) {
+    ctx.body = { code: -10001, msg: '保存配置失败', plainMsg: e.message };
+  }
+});
+
 router.post('/configList/add', async (ctx) => {
   console.log(ctx.request.body);
   try {
-    let insertResult = await configListDb.add(ctx.request.body);
-    ctx.body = {
-      code: 0,
-      data: {
-        insertResult
-      },
-      msg: '成功'
-    };
+    let res = await configListDb.add(ctx.request.body);
+    let { insertData, result } = res;
+    if (result.insertedCount === 1) {
+      ctx.body = {
+        code: 0,
+        data: insertData,
+        msg: '成功'
+      };
+    } else {
+      ctx.body = { code: -10001, msg: '保存配置失败', plainMsg: e.message };
+    }
   } catch (e) {
     ctx.body = { code: -10001, msg: '保存配置失败', plainMsg: e.message };
   }
