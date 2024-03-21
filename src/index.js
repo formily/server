@@ -247,6 +247,25 @@ router.post('/configList/add', async (ctx) => {
   }
 });
 
+router.get('/configList/detail/:bid', async (ctx) => {
+  console.log('ctx.query', ctx.params);
+  const bid = ctx.params.bid;
+  try {
+    const detailData = await configListDb.getDetailById(bid);
+    if (detailData) {
+      ctx.body = {
+        code: 0,
+        data: detailData,
+        msg: '成功'
+      };
+    } else {
+      ctx.body = { code: -10001, msg: '无效的bid', plainMsg: '' };
+    }
+  } catch (e) {
+    ctx.body = { code: -10001, msg: '获取配置详情失败', plainMsg: e.message };
+  }
+});
+
 router.get('/configList/list', async (ctx) => {
   console.log('ctx.query', ctx.query);
   let { queryText, currentPage = 1, pageSize = 20 } = ctx.query;

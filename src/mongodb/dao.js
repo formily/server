@@ -91,7 +91,7 @@ const configListDb = {
     if (queryStr) {
       queryRule = {
         // userId, // where userId='xxx' and ( shortLink like '%xx%' or xxx)
-        // $or: [{ shortLink: { $regex: queryStr } }, { redirect: { $regex: queryStr } }]
+        $or: [{ name: { $regex: queryStr } }, { remark: { $regex: queryStr } }, { bid: { $regex: queryStr } }]
       };
     }
     // 页码 - skip数据量 - 公式
@@ -101,7 +101,7 @@ const configListDb = {
     const list = await db
       .collection('configList')
       .find(queryRule)
-      .sort({ createDate: -1 })
+      .sort({ updateDate: -1 })
       .limit(pageSize)
       .skip((pageIndex - 1) * pageSize)
       .toArray();
@@ -120,6 +120,7 @@ const configListDb = {
       // userId: userId,
       // bid: payload.bid, // 配置ID
       // config: payload.config, // 低代码 schema 配置
+      updateDate: getCurDate(),
       createDate: getCurDate()
     };
     // 插入数据时 _id 会自动增加
@@ -139,6 +140,19 @@ const configListDb = {
     );
     console.log('result', result);
     return { result: result };
+  },
+
+  async getDetailById(bid) {
+    const db = mongodbCore.getDb();
+    const result = await db.collection('configList').findOne({ bid });
+    if (result) {
+      console.log(result);
+    } else {
+      console.log('not found', bid);
+    }
+
+    console.log('result', result);
+    return result || '';
   }
 };
 module.exports = {
