@@ -1,41 +1,28 @@
-# zuo-config-server
+# formily server
 
-Config center server part, by Koa.js + MongoDB
+Koa.js + MongoDB
 
-> Node version: v14.19.1，比较新的版本，比如 18.17.1 可能会导致接口服务崩溃
 
-注意：运行服务需要开启 MongoDB 服务，如果没有开机启动服务，需要在手动启动服务后，重新运行 node src/index.js 重启接口服务 
+## 服务器 linux 安装 mongodb
 
-## 对外接口鉴权
-
-TODO
-
-类似小程序 appId + appSecret？如果解析一致，判定当前调用方具有该 appid(用户)的权限。
-
-这里传 userName +  秘钥（这个逻辑只能在后端做，防止 秘钥暴露）
-
-秘钥生成方式：userName + _id + 服务端私有秘钥，通过 jwt.sign 生成永久有效的秘钥(token)
-
-暂未做鉴权对外接口
-
-<http://127.0.0.1:5000/share/shortLink/list?_id=63c3babac401a248bd88988a>  
+[mongodb 怎么部署到 linux/centeros 安装 mongodb](https://fe.zuo11.com/daily/2023-01.html#mongodb-%E6%80%8E%E4%B9%88%E9%83%A8%E7%BD%B2%E5%88%B0-linux-centeros-%E5%AE%89%E8%A3%85-mongodb)
 
 ## Mongodb 数据库/集合
 
-db: "zuo-config"
-
 ```bash
 # 连接/创建数据库, use 数据库名称
-use zuo-config
+use formily
+
+
 ```
 
 ### collection
 
-#### short-link 短链接模块
+#### configList
 
 ```bash
 # 创建集合
-db.createCollection('short-link')
+db.createCollection('configList')
 ```
 
 #### user 用户模块
