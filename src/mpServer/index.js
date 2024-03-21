@@ -43,8 +43,8 @@ const init = (router) => {
   dbOptTest.init(router);
 };
 
-const appid = 'wxddd0151231a29656';
-const secret = 'b1d90f0e6e6a711bde5989c5df408f24';
+const appid = 'xxx';
+const secret = 'xxx';
 const auth = (code) => {
   return new Promise((resolve, reject) => {
     let url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${secret}&js_code=${code}&grant_type=authorization_code`;
